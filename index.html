@@ -1,21 +1,100 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <style>
-            body {
-                background-color: black;
-                color: #00FF00;
-                font-family: monospace;
-            }
 
-            a {
-                color: greenyellow;
-            }
-        </style>
-    </head>
-    <body>
-        Hi, I'm Petter aka Voxed.
+<head>
+    <style>
+        body {
+            background-color: black;
+            color: #00FF00;
+            font-family: monospace;
+        }
 
-        Check out my <a href="https://www.twitter.com/_voxed">twitter</a> or <a href="https://www.github.com/voxed">github</a>.
-    </body>
+        a {
+            color: greenyellow;
+        }
+    </style>
+</head>
+
+<body>
+    Hi, I'm Petter aka Voxed.
+
+    Check out my <a href="https://www.twitter.com/_voxed">twitter</a> or <a
+        href="https://www.github.com/voxed">github</a>.
+
+    <!--just messing around below :)-->
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.123.0/build/three.module.js';
+        import {OBJLoader2} from 'https://unpkg.com/three@0.123.0/examples/jsm/loaders/OBJLoader2.js'
+
+        const scene = new THREE.Scene();
+        const loader = new OBJLoader2();
+        const tex = new THREE.TextureLoader();
+        const mat = new THREE.MeshStandardMaterial();
+        const mat2 = new THREE.MeshStandardMaterial();
+
+        var texture = tex.load( "tree_d.png" );
+        var texture2 = tex.load( "leaves_d.png" );
+        mat.map = texture;
+        mat2.map = texture2;
+        mat2.transprent = true
+        mat2.alphaTest = 0.5
+        mat2.side = THREE.DoubleSide
+        var o = null
+        
+        loader.load(
+            // resource URL
+            './tree.obj',
+            // called when resource is loaded
+            function (object) {
+                object.traverse( function (child) {
+                    if ( child instanceof THREE.Mesh ) {
+                        child.material = [mat2, mat]
+                    }
+                });
+                console.log(object)
+                o = object
+                o.position.set(0,-6,-8)
+
+                scene.add(object);
+
+            },
+            // called when loading is in progresses
+            function (xhr) {
+
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+            },
+            // called when loading has errors
+            function (error) {
+
+                console.log('An error happened');
+
+            }
+        );
+
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(600, 600);
+        document.body.appendChild(renderer.domElement);
+        const light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
+        scene.add(light)
+
+        camera.position.z = 5;
+
+        let start;
+
+        function animate(timestamp) {
+            requestAnimationFrame(animate);
+            if (start === undefined)
+                start = timestamp;
+            const elapsed = timestamp - start;
+            start = timestamp
+            o.rotation.set(o.rotation.x, o.rotation.y+elapsed/5000, o.rotation.z)
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+
 </html>
